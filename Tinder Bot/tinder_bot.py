@@ -2,7 +2,10 @@ from selenium import webdriver
 from time import sleep
 from selenium.webdriver.common.keys import Keys
 
-from login_details import email, password
+# from login_details import email, password
+
+email = input("Enter your email: ")
+password = input("Enter your password: ")
 
 class TinderBot():
     def __init__(self):
@@ -97,8 +100,8 @@ class TinderBot():
         self.driver.get(link)
         sleep(2)
         text_area = self.driver.find_element('xpath', '/html/body/div[1]/div/div[1]/div/main/div[1]/div/div/div/div[1]/div/div/div[3]/form/textarea')
-
-        text_area.send_keys('hi')
+        message = input("Enter the message you want to send: ")
+        text_area.send_keys(message)
 
         text_area.send_keys(Keys.ENTER)
     
