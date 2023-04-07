@@ -6,6 +6,7 @@ from selenium.webdriver.common.keys import Keys
 
 email = input("Enter your email: ")
 password = input("Enter your password: ")
+first_message = input("Enter the message you want to send: ")
 
 class TinderBot():
     def __init__(self):
@@ -62,6 +63,12 @@ class TinderBot():
         self.driver.switch_to.window(base_window)
 
 
+    def allow_location(self):
+        click_allow_location = self.driver.find_element('xpath', '/html/body/div[2]/main/div/div/div/div[3]/button[1]/div[2]/div[2]')
+        click_allow_location.click()
+        sleep(2)   
+
+
     #Swiping matches
     def right_swipe(self):
         doc = self.driver.find_element('xpath', '//*[@id="Tinder"]/body')
@@ -100,8 +107,8 @@ class TinderBot():
         self.driver.get(link)
         sleep(2)
         text_area = self.driver.find_element('xpath', '/html/body/div[1]/div/div[1]/div/main/div[1]/div/div/div/div[1]/div/div/div[3]/form/textarea')
-        message = input("Enter the message you want to send: ")
-        text_area.send_keys(message)
+        
+        text_area.send_keys(first_message)
 
         text_area.send_keys(Keys.ENTER)
     
