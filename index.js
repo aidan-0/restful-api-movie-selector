@@ -3,6 +3,8 @@ let originalSearch = [];
 const movieSearchBox = document.getElementById("movie-search-box");
 const searchResult = document.getElementById("results");
 const searchBtn = document.getElementById("search-btn");
+const removeBtn = document.getElementById("remove-watchlist");
+const watchlistResultDiv = document.getElementById("watchlist-result");
 
 //Function to fetch movies list from API
 async function loadMovies(searchTerm) {
@@ -41,7 +43,7 @@ function displayMovieList(movies) {
 
         `;
     searchResult.appendChild(movieListItem);
-    handleClickWatchlist(movieListItem)
+    handleClickWatchlist(movieListItem);
   });
   attachMovieDetailsListener();
 
@@ -50,24 +52,36 @@ function displayMovieList(movies) {
 
 // Allow user to click on add to watchlist
 function handleClickWatchlist(movieListItem) {
-  const watchlistGroup = movieListItem.querySelector('.watchlist-group');
-  watchlistGroup.addEventListener('click', (e) => {
-    
-      e.stopPropagation();
-      
-      // Get the existing watchlist from localStorage or create a new one
-      let watchlist = JSON.parse(localStorage.getItem('watchlist')) || [];
-      
-      const imdbID = movieListItem.dataset.id;
-      
+  const watchlistGroup = movieListItem.querySelector(".watchlist-group");
+  const icon = watchlistGroup.querySelector("iconify-icon");
+
+  watchlistGroup.addEventListener("click", (e) => {
+    e.stopPropagation();
+
+    // Get the existing watchlist from localStorage or create a new one
+    let watchlist = JSON.parse(localStorage.getItem("watchlist")) || [];
+    const imdbID = movieListItem.dataset.id;
+
+    if (icon.getAttribute("id") === "plus-icon") {
       // Check if movie is not already in the watchlist
       if (watchlist.indexOf(imdbID) === -1) {
-          watchlist.push(imdbID);
-          localStorage.setItem('watchlist', JSON.stringify(watchlist));
+        watchlist.push(imdbID);
+        localStorage.setItem("watchlist", JSON.stringify(watchlist));
       }
-  })
+      icon.setAttribute("id", "tick-icon");
+      icon.setAttribute("icon", "mdi:tick-circle");
+    } else if (icon.getAttribute("id") === "tick-icon") {
+      // Remove from watchlist and change to plus
+      const index = watchlist.indexOf(imdbID);
+      if (index !== -1) {
+        watchlist.splice(index, 1);
+        localStorage.setItem("watchlist", JSON.stringify(watchlist));
+      }
+      icon.setAttribute("id", "plus-icon");
+      icon.setAttribute("icon", "clarity:plus-circle-solid");
+    }
+  });
 }
-
 
 // Display Full Movie Details
 function attachMovieDetailsListener() {
@@ -76,9 +90,9 @@ function attachMovieDetailsListener() {
     movie.addEventListener("click", async () => {
       const movieDetails = await getMovieDetails(movie.dataset.id);
       displayMovieDetails(movieDetails);
-    //   console.log(getMovieDetails(movie.dataset.id));
-    //   console.log("break");
-    //   console.log(displayMovieDetails(movieDetails));
+      //   console.log(getMovieDetails(movie.dataset.id));
+      //   console.log("break");
+      //   console.log(displayMovieDetails(movieDetails));
     });
   });
 }
@@ -120,56 +134,55 @@ function displayMovieDetails(data) {
   searchBtn.innerHTML = "Back";
 }
 
-
-
-
-
 function handleSearch() {
-    if (searchBtn.innerHTML === "Search") {
-      let searchTerm = movieSearchBox.value.trim();
-      if (searchTerm.length > 0) {
-        searchResult.classList.remove("hide-search-list");
-        loadMovies(searchTerm);
-      }
-    } else if (searchBtn.innerHTML === "Clear") {
-      searchResult.innerHTML = "";
-      searchBtn.innerHTML = "Search";
-    } else if (searchBtn.innerHTML === "Back") {
-      searchResult.innerHTML = "";
-      searchBtn.innerHTML = "Clear";
-      displayMovieList(originalSearch);
+  if (searchBtn.innerHTML === "Search") {
+    let searchTerm = movieSearchBox.value.trim();
+    if (searchTerm.length > 0) {
+      searchResult.classList.remove("hide-search-list");
+      loadMovies(searchTerm);
     }
+  } else if (searchBtn.innerHTML === "Clear") {
+    searchResult.innerHTML = "";
+    searchBtn.innerHTML = "Search";
+  } else if (searchBtn.innerHTML === "Back") {
+    searchResult.innerHTML = "";
+    searchBtn.innerHTML = "Clear";
+    displayMovieList(originalSearch);
   }
+}
 
 searchBtn.addEventListener("click", handleSearch);
 
 movieSearchBox.addEventListener("keydown", (event) => {
-    if (event.key === 'Enter') { 
-      handleSearch();
-    }
-  });
+  if (event.key === "Enter") {
+    handleSearch();
+  }
+});
 
-
-  async function getMovieById(imdbID) {
-    const response = await fetch(
-        `https://www.omdbapi.com/?i=${imdbID}&apikey=5fb49aab`
-    );
-    return response.json();
+async function getMovieById(imdbID) {
+  const response = await fetch(
+    `https://www.omdbapi.com/?i=${imdbID}&apikey=5fb49aab`
+  );
+  return response.json();
 }
 
 function displayWatchlist() {
-    const watchlist = JSON.parse(localStorage.getItem('watchlist')) || [];
-    const resultsDiv = document.getElementById("watchlist-result");
-    resultsDiv.innerHTML = '';
+  const resultsDiv = document.getElementById("watchlist-result");
+  if (!resultsDiv) {
+    return;
+  }
 
-    watchlist.forEach(async (imdbID) => {
-        let movieData = await getMovieById(imdbID);
-        let movieListItem = document.createElement("div");
-        movieListItem.dataset.id = movieData.imdbID;
-        movieListItem.classList.add("search-list-item");
-        let moviePoster =
-            movieData.Poster != "N/A" ? movieData.Poster : "image_not_found.png";
-        movieListItem.innerHTML = `
+  const watchlist = JSON.parse(localStorage.getItem("watchlist")) || [];
+  resultsDiv.innerHTML = "";
+
+  watchlist.forEach(async (imdbID) => {
+    let movieData = await getMovieById(imdbID);
+    let movieListItem = document.createElement("div");
+    movieListItem.dataset.id = movieData.imdbID;
+    movieListItem.classList.add("search-list-item");
+    let moviePoster =
+      movieData.Poster != "N/A" ? movieData.Poster : "image_not_found.png";
+    movieListItem.innerHTML = `
             <div class="search-item-thumbnail">
                 <img src="${moviePoster}">
             </div>
@@ -177,30 +190,45 @@ function displayWatchlist() {
                 <h3>${movieData.Title}</h3>
                 <div class="info-grouping">
                     <p>${movieData.Year}</p>
+                    <div href="watchlist.html" class="watchlist-group">
+                    <p id="watchlist" class="remove-watchlist">Remove From Watchlist</p>
+                    <iconify-icon id="minus-icon" icon="akar-icons:circle-minus-fill"></iconify-icon>
+                    </div>
                 </div>
             </div>
         `;
-        resultsDiv.appendChild(movieListItem);
-    });
+    resultsDiv.appendChild(movieListItem);
+  });
 }
 
-// Call the displayWatchlist function on load
-window.onload = function() {
-    displayWatchlist();
+window.onload = function () {
+  displayWatchlist();
 };
 
-  
+if (watchlistResultDiv) {
+  watchlistResultDiv.addEventListener("click", function (event) {
+    // Determine if the clicked element or its parent is the remove button
+    let target = event.target;
+    while (target !== this && !target.classList.contains("watchlist-group")) {
+      target = target.parentElement;
+    }
 
+    // If we found the remove button
+    if (target !== this) {
+      const movieListItem = target.closest(".search-list-item");
+      const imdbID = movieListItem.dataset.id;
 
-/* todo:
-- when selecting 'watch list' it should animate a colour change and not remove your search
-- when clicking on the selected film in your watchlist it should show further details
-- fix formatting on details page
-- add loading circle on each click
-- add a tick when watchlist has been added, after it loads
-- remove from watchlist button
-- hover colour on search list
-- if user inputs less than 3 letters bring up a note saying that the user must enter 4 or more letters, and this is a limitation of the api pulling too many results.
--set button width
+      let watchlist = JSON.parse(localStorage.getItem("watchlist")) || [];
 
-*/
+      // Check if the movie exists in the watchlist
+      const index = watchlist.indexOf(imdbID);
+      if (index !== -1) {
+        watchlist.splice(index, 1);
+        localStorage.setItem("watchlist", JSON.stringify(watchlist));
+
+        // Refresh the display of the watchlist
+        displayWatchlist();
+      }
+    }
+  });
+}
