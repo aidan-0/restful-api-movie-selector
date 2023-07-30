@@ -11,7 +11,14 @@ async function loadMovies(searchTerm) {
   const URL = `https://omdbapi.com/?s=${searchTerm}&page=1&apikey=5fb49aab`;
   const res = await fetch(`${URL}`);
   const data = await res.json();
-  if (data.Response == "True") displayMovieList(data.Search);
+  if (data.Response == "True") {
+    displayMovieList(data.Search)
+    searchResult.classList.remove("results-error-styling")
+  } else {
+    console.log(data.Error)
+    searchResult.innerHTML = data.Error
+    searchResult.classList.add("results-error-styling")
+  }
 }
 
 function displayMovieList(movies) {
@@ -167,44 +174,58 @@ async function getMovieById(imdbID) {
 }
 
 function displayWatchlist() {
-  const resultsDiv = document.getElementById("watchlist-result");
-  if (!resultsDiv) {
-    return;
+  const watchlistItemsDiv = document.getElementById("watchlist-items");
+  const watchlistMessageDiv = document.getElementById("watchlist-message"); // <--- This is your message div
+
+  if (!watchlistItemsDiv) {
+      return;
   }
 
   const watchlist = JSON.parse(localStorage.getItem("watchlist")) || [];
-  resultsDiv.innerHTML = "";
+  watchlistItemsDiv.innerHTML = "";
 
-  watchlist.forEach(async (imdbID) => {
-    let movieData = await getMovieById(imdbID);
-    let movieListItem = document.createElement("div");
-    movieListItem.dataset.id = movieData.imdbID;
-    movieListItem.classList.add("search-list-item");
-    let moviePoster =
-      movieData.Poster != "N/A" ? movieData.Poster : "image_not_found.png";
-    movieListItem.innerHTML = `
-            <div class="search-item-thumbnail">
-                <img src="${moviePoster}">
-            </div>
-            <div class="search-item-info">
-                <h3>${movieData.Title}</h3>
-                <div class="info-grouping">
-                    <p>${movieData.Year}</p>
-                    <div href="watchlist.html" class="watchlist-group">
-                    <p id="watchlist" class="remove-watchlist">Remove From Watchlist</p>
-                    <iconify-icon id="minus-icon" icon="akar-icons:circle-minus-fill"></iconify-icon>
-                    </div>
-                </div>
-            </div>
-        `;
-    resultsDiv.appendChild(movieListItem);
-  });
+  if (watchlist.length === 0) { 
+      watchlistMessageDiv.style.display = "flex"; 
+  } else {
+      watchlistMessageDiv.style.display = "none"; 
+
+      watchlist.forEach(async (imdbID) => {
+          let movieData = await getMovieById(imdbID);
+          let movieListItem = document.createElement("div");
+          movieListItem.dataset.id = movieData.imdbID;
+          movieListItem.classList.add("search-list-item");
+          let moviePoster =
+              movieData.Poster != "N/A" ? movieData.Poster : "image_not_found.png";
+          movieListItem.innerHTML = `
+              <div class="search-item-thumbnail">
+                  <img src="${moviePoster}">
+              </div>
+              <div class="search-item-info">
+                  <h3>${movieData.Title}</h3>
+                  <div class="info-grouping">
+                      <p>${movieData.Year}</p>
+                      <div href="watchlist.html" class="watchlist-group">
+                      <p id="watchlist" class="remove-watchlist">Remove From Watchlist</p>
+                      <iconify-icon id="minus-icon" icon="akar-icons:circle-minus-fill"></iconify-icon>
+                      </div>
+                  </div>
+              </div>
+          `;
+          watchlistItemsDiv.appendChild(movieListItem);
+      });
+  }
 }
+
+
+
 
 window.onload = function () {
   displayWatchlist();
 };
 
+
+
+// Remove from watchlist
 if (watchlistResultDiv) {
   watchlistResultDiv.addEventListener("click", function (event) {
     // Determine if the clicked element or its parent is the remove button
