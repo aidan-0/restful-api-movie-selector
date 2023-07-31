@@ -1,21 +1,23 @@
 let originalSearch = [];
+let currentPage = 1;
 
 const movieSearchBox = document.getElementById("movie-search-box");
 const searchResult = document.getElementById("results");
 const searchBtn = document.getElementById("search-btn");
 const removeBtn = document.getElementById("remove-watchlist");
 const watchlistResultDiv = document.getElementById("watchlist-result");
+const prevBtn = document.getElementById("prevBtn")
+const nextBtn = document.getElementById("nextBtn")
 
 //Function to fetch movies list from API
-async function loadMovies(searchTerm) {
-  const URL = `https://omdbapi.com/?s=${searchTerm}&page=1&apikey=5fb49aab`;
+async function loadMovies(searchTerm, currentPage) {
+  const URL = `https://omdbapi.com/?s=${searchTerm}&page=${currentPage}&apikey=5fb49aab`;
   const res = await fetch(`${URL}`);
   const data = await res.json();
   if (data.Response == "True") {
     displayMovieList(data.Search);
     searchResult.classList.remove("results-error-styling");
   } else {
-    console.log(data.Error);
     searchResult.innerHTML = data.Error;
     searchResult.classList.add("results-error-styling");
   }
@@ -170,6 +172,8 @@ function handleSearch() {
     let searchTerm = movieSearchBox.value.trim();
     if (searchTerm.length > 0) {
       searchResult.classList.remove("hide-search-list");
+      currentPage = 1;
+      handlePageButtons()
       loadMovies(searchTerm);
     }
   } else if (searchBtn.innerHTML === "Clear") {
@@ -240,9 +244,7 @@ function displayWatchlist() {
   }
 }
 
-window.onload = function () {
-  displayWatchlist();
-};
+
 
 // Remove from watchlist
 if (watchlistResultDiv) {
@@ -272,3 +274,41 @@ if (watchlistResultDiv) {
     }
   });
 }
+
+
+
+prevBtn.addEventListener("click", function() {
+  if(currentPage > 1) {
+    currentPage--;
+    console.log("Current Page After Increment: ", currentPage); // Log 1
+    loadMovies(movieSearchBox.value, currentPage);
+  }
+  handlePageButtons();
+})
+
+nextBtn.addEventListener("click", function() {
+  currentPage++;
+  console.log("Current Page After Increment: ", currentPage); // Log 1
+  loadMovies(movieSearchBox.value, currentPage);
+  handlePageButtons();
+})
+
+// Toggle between pages
+function handlePageButtons() {
+  const prevBtnChildren = prevBtn.children;
+  if (currentPage === 1) {
+    for (let child of prevBtnChildren) {
+      child.classList.add("hide-prev-btn")
+    }
+  } else {
+    for (let child of prevBtnChildren) {
+      child.classList.remove("hide-prev-btn")
+    }
+  }
+}
+
+
+window.onload = function () {
+  displayWatchlist();
+  handlePageButtons();
+};
