@@ -62,37 +62,41 @@ function displayMovieList(movies) {
 }
 
 // Allow user to click on add to watchlist
+function toggleMovieInWatchlist(movieId, iconElement) {
+  let watchlist = JSON.parse(localStorage.getItem("watchlist")) || [];
+  
+  // If movie is not in watchlist, add it
+  if (iconElement.getAttribute("id") === "plus-icon") {
+    if (watchlist.indexOf(movieId) === -1) {
+      watchlist.push(movieId);
+      localStorage.setItem("watchlist", JSON.stringify(watchlist));
+    }
+    iconElement.setAttribute("id", "tick-icon");
+    iconElement.setAttribute("icon", "mdi:tick-circle");
+  }
+  // If movie is in watchlist, remove it
+  else if (iconElement.getAttribute("id") === "tick-icon") {
+    const index = watchlist.indexOf(movieId);
+    if (index !== -1) {
+      watchlist.splice(index, 1);
+      localStorage.setItem("watchlist", JSON.stringify(watchlist));
+    }
+    iconElement.setAttribute("id", "plus-icon");
+    iconElement.setAttribute("icon", "clarity:plus-circle-solid");
+  }
+}
+
 function handleClickWatchlist(movieListItem) {
   const watchlistGroup = movieListItem.querySelector(".watchlist-group");
   const icon = watchlistGroup.querySelector("iconify-icon");
 
   watchlistGroup.addEventListener("click", (e) => {
     e.stopPropagation();
-
-    // Get the existing watchlist from localStorage or create a new one
-    let watchlist = JSON.parse(localStorage.getItem("watchlist")) || [];
-    const imdbID = movieListItem.dataset.id;
-
-    if (icon.getAttribute("id") === "plus-icon") {
-      // Check if movie is not already in the watchlist
-      if (watchlist.indexOf(imdbID) === -1) {
-        watchlist.push(imdbID);
-        localStorage.setItem("watchlist", JSON.stringify(watchlist));
-      }
-      icon.setAttribute("id", "tick-icon");
-      icon.setAttribute("icon", "mdi:tick-circle");
-    } else if (icon.getAttribute("id") === "tick-icon") {
-      // Remove from watchlist and change to plus
-      const index = watchlist.indexOf(imdbID);
-      if (index !== -1) {
-        watchlist.splice(index, 1);
-        localStorage.setItem("watchlist", JSON.stringify(watchlist));
-      }
-      icon.setAttribute("id", "plus-icon");
-      icon.setAttribute("icon", "clarity:plus-circle-solid");
-    }
+    toggleMovieInWatchlist(movieListItem.dataset.id, icon);
   });
 }
+
+
 
 // Display Full Movie Details
 function attachMovieDetailsListener() {
@@ -130,10 +134,13 @@ function displayMovieDetails(data) {
                     <span>${data.Year}</span>
                     <span>${data.Runtime}</span>
                 </div>
-                <div class="genre">${data.Genre.split(",").join(
-                  "</div><div>"
-                )}</div>
-                <p>Add to Watch List</p>
+                <div class="genre">
+                    ${data.Genre.split(",").map(genre => `<div>${genre}</div>`).join("")}
+                </div>
+                <div class="details-watchlist">
+                    <p>Add to Watch List</p>
+                    <iconify-icon id="plus-icon" icon="clarity:plus-circle-solid"></iconify-icon>
+                </div>
             </div>
         </div>
         <h3>Plot:</h3>
@@ -143,7 +150,21 @@ function displayMovieDetails(data) {
     `;
 
   searchBtn.innerHTML = "Back";
+  const detailsWatchlistDiv = searchResult.querySelector(".details-watchlist");
+  const detailsWatchlistIcon = detailsWatchlistDiv.querySelector("iconify-icon");
+  
+  let watchlist = JSON.parse(localStorage.getItem("watchlist")) || [];
+  if (watchlist.indexOf(data.imdbID) !== -1) {
+    detailsWatchlistIcon.setAttribute("id", "tick-icon");
+    detailsWatchlistIcon.setAttribute("icon", "mdi:tick-circle");
+  }
+
+  detailsWatchlistDiv.addEventListener("click", (e) => {
+    e.stopPropagation();
+    toggleMovieInWatchlist(data.imdbID, detailsWatchlistIcon);
+  });
 }
+
 
 function handleSearch() {
   if (searchBtn.innerHTML === "Search") {
@@ -220,14 +241,9 @@ function displayWatchlist() {
   }
 }
 
-
-
-
 window.onload = function () {
   displayWatchlist();
 };
-
-
 
 // Remove from watchlist
 if (watchlistResultDiv) {

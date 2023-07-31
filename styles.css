@@ -117,8 +117,13 @@ body {
   margin-top: 1.2em;
 }
 
+.info div h2 {
+  text-align: center;
+}
+
 .poster {
   width: 100%;
+  padding-right: 1em;
 }
 
 .rating {
@@ -160,6 +165,13 @@ body {
   padding: 0.4em 1.6em;
   border-radius: 0.4em;
   font-weight: 300;
+}
+
+.details-watchlist {
+  display: flex;
+  justify-content: end;
+  margin-top: 1em;
+  cursor: pointer;
 }
 
 h3 {
