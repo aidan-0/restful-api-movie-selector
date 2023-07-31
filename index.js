@@ -94,40 +94,6 @@ function handleClickWatchlist(movieListItem) {
 
 
 
-
-
-// function handleClickWatchlist(movieListItem) {
-//   const watchlistGroup = movieListItem.querySelector(".watchlist-group");
-//   const icon = watchlistGroup.querySelector("iconify-icon");
-
-//   watchlistGroup.addEventListener("click", (e) => {
-//     e.stopPropagation();
-
-//     // Get the existing watchlist from localStorage or create a new one
-//     let watchlist = JSON.parse(localStorage.getItem("watchlist")) || [];
-//     const imdbID = movieListItem.dataset.id;
-
-//     if (icon.getAttribute("id") === "plus-icon") {
-//       // Check if movie is not already in the watchlist
-//       if (watchlist.indexOf(imdbID) === -1) {
-//         watchlist.push(imdbID);
-//         localStorage.setItem("watchlist", JSON.stringify(watchlist));
-//       }
-//       icon.setAttribute("id", "tick-icon");
-//       icon.setAttribute("icon", "mdi:tick-circle");
-//     } else if (icon.getAttribute("id") === "tick-icon") {
-//       // Remove from watchlist and change to plus
-//       const index = watchlist.indexOf(imdbID);
-//       if (index !== -1) {
-//         watchlist.splice(index, 1);
-//         localStorage.setItem("watchlist", JSON.stringify(watchlist));
-//       }
-//       icon.setAttribute("id", "plus-icon");
-//       icon.setAttribute("icon", "clarity:plus-circle-solid");
-//     }
-//   });
-// }
-
 // Display Full Movie Details
 function attachMovieDetailsListener() {
   const searchResultMovies = searchResult.querySelectorAll(".search-list-item");
@@ -271,14 +237,9 @@ function displayWatchlist() {
   }
 }
 
-
-
-
 window.onload = function () {
   displayWatchlist();
 };
-
-
 
 // Remove from watchlist
 if (watchlistResultDiv) {
