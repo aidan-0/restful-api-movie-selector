@@ -12,25 +12,30 @@ async function loadMovies(searchTerm) {
   const res = await fetch(`${URL}`);
   const data = await res.json();
   if (data.Response == "True") {
-    displayMovieList(data.Search)
-    searchResult.classList.remove("results-error-styling")
+    displayMovieList(data.Search);
+    searchResult.classList.remove("results-error-styling");
   } else {
-    console.log(data.Error)
-    searchResult.innerHTML = data.Error
-    searchResult.classList.add("results-error-styling")
+    console.log(data.Error);
+    searchResult.innerHTML = data.Error;
+    searchResult.classList.add("results-error-styling");
   }
 }
 
 function displayMovieList(movies) {
   originalSearch = movies;
   searchResult.innerHTML = "";
+  let watchlist = JSON.parse(localStorage.getItem("watchlist")) || []
+
   movies.forEach((movieData) => {
+    let isInWatchlist = watchlist.indexOf(movieData.imdbID) !== -1;
+    let iconId = isInWatchlist ? "tick-icon" : "plus-icon";
+    let iconName = isInWatchlist ? "mdi:tick-circle" : "clarity:plus-circle-solid"
+    
     let movieListItem = document.createElement("div");
     movieListItem.dataset.id = movieData.imdbID;
     movieListItem.classList.add("search-list-item");
-    let moviePoster =
-      movieData.Poster != "N/A" ? movieData.Poster : "image_not_found.png";
-    // console.log(movieData);
+    let moviePoster = movieData.Poster != "N/A" ? movieData.Poster : "image_not_found.png";
+
     movieListItem.innerHTML = `
             <div class="search-item-thumbnail">
                 <img src="${moviePoster}">
@@ -41,13 +46,10 @@ function displayMovieList(movies) {
                     <p>${movieData.Year}</p>
                     <div href="watchlist.html" class="watchlist-group">
                     <p id="watchlist">Watchlist</p>
-                    <iconify-icon id="plus-icon" icon="clarity:plus-circle-solid"></iconify-icon>
+                    <iconify-icon id="${iconId}" icon="${iconName}"></iconify-icon>
                     </div>
                 </div>
             </div>
-
-
-
         `;
     searchResult.appendChild(movieListItem);
     handleClickWatchlist(movieListItem);
@@ -56,15 +58,15 @@ function displayMovieList(movies) {
 
   searchBtn.innerHTML = "Clear";
 
-  movieSearchBox.addEventListener('input', function() {
-    searchBtn.innerHTML = "Search"
-  })
+  movieSearchBox.addEventListener("input", function () {
+    searchBtn.innerHTML = "Search";
+  });
 }
 
 // Allow user to click on add to watchlist
 function toggleMovieInWatchlist(movieId, iconElement) {
   let watchlist = JSON.parse(localStorage.getItem("watchlist")) || [];
-  
+
   // If movie is not in watchlist, add it
   if (iconElement.getAttribute("id") === "plus-icon") {
     if (watchlist.indexOf(movieId) === -1) {
@@ -96,8 +98,6 @@ function handleClickWatchlist(movieListItem) {
   });
 }
 
-
-
 // Display Full Movie Details
 function attachMovieDetailsListener() {
   const searchResultMovies = searchResult.querySelectorAll(".search-list-item");
@@ -105,9 +105,6 @@ function attachMovieDetailsListener() {
     movie.addEventListener("click", async () => {
       const movieDetails = await getMovieDetails(movie.dataset.id);
       displayMovieDetails(movieDetails);
-      //   console.log(getMovieDetails(movie.dataset.id));
-      //   console.log("break");
-      //   console.log(displayMovieDetails(movieDetails));
     });
   });
 }
@@ -135,10 +132,12 @@ function displayMovieDetails(data) {
                     <span>${data.Runtime}</span>
                 </div>
                 <div class="genre">
-                    ${data.Genre.split(",").map(genre => `<div>${genre}</div>`).join("")}
+                    ${data.Genre.split(",")
+                      .map((genre) => `<div>${genre}</div>`)
+                      .join("")}
                 </div>
                 <div class="details-watchlist">
-                    <p>Add to Watch List</p>
+                    <p>Watchlist</p>
                     <iconify-icon id="plus-icon" icon="clarity:plus-circle-solid"></iconify-icon>
                 </div>
             </div>
@@ -151,8 +150,9 @@ function displayMovieDetails(data) {
 
   searchBtn.innerHTML = "Back";
   const detailsWatchlistDiv = searchResult.querySelector(".details-watchlist");
-  const detailsWatchlistIcon = detailsWatchlistDiv.querySelector("iconify-icon");
-  
+  const detailsWatchlistIcon =
+    detailsWatchlistDiv.querySelector("iconify-icon");
+
   let watchlist = JSON.parse(localStorage.getItem("watchlist")) || [];
   if (watchlist.indexOf(data.imdbID) !== -1) {
     detailsWatchlistIcon.setAttribute("id", "tick-icon");
@@ -164,7 +164,6 @@ function displayMovieDetails(data) {
     toggleMovieInWatchlist(data.imdbID, detailsWatchlistIcon);
   });
 }
-
 
 function handleSearch() {
   if (searchBtn.innerHTML === "Search") {
@@ -203,25 +202,25 @@ function displayWatchlist() {
   const watchlistMessageDiv = document.getElementById("watchlist-message"); // <--- This is your message div
 
   if (!watchlistItemsDiv) {
-      return;
+    return;
   }
 
   const watchlist = JSON.parse(localStorage.getItem("watchlist")) || [];
   watchlistItemsDiv.innerHTML = "";
 
-  if (watchlist.length === 0) { 
-      watchlistMessageDiv.style.display = "flex"; 
+  if (watchlist.length === 0) {
+    watchlistMessageDiv.style.display = "flex";
   } else {
-      watchlistMessageDiv.style.display = "none"; 
+    watchlistMessageDiv.style.display = "none";
 
-      watchlist.forEach(async (imdbID) => {
-          let movieData = await getMovieById(imdbID);
-          let movieListItem = document.createElement("div");
-          movieListItem.dataset.id = movieData.imdbID;
-          movieListItem.classList.add("search-list-item");
-          let moviePoster =
-              movieData.Poster != "N/A" ? movieData.Poster : "image_not_found.png";
-          movieListItem.innerHTML = `
+    watchlist.forEach(async (imdbID) => {
+      let movieData = await getMovieById(imdbID);
+      let movieListItem = document.createElement("div");
+      movieListItem.dataset.id = movieData.imdbID;
+      movieListItem.classList.add("search-list-item");
+      let moviePoster =
+        movieData.Poster != "N/A" ? movieData.Poster : "image_not_found.png";
+      movieListItem.innerHTML = `
               <div class="search-item-thumbnail">
                   <img src="${moviePoster}">
               </div>
@@ -236,8 +235,8 @@ function displayWatchlist() {
                   </div>
               </div>
           `;
-          watchlistItemsDiv.appendChild(movieListItem);
-      });
+      watchlistItemsDiv.appendChild(movieListItem);
+    });
   }
 }
 
