@@ -55,6 +55,10 @@ function displayMovieList(movies) {
   attachMovieDetailsListener();
 
   searchBtn.innerHTML = "Clear";
+
+  movieSearchBox.addEventListener('input', function() {
+    searchBtn.innerHTML = "Search"
+  })
 }
 
 // Allow user to click on add to watchlist
