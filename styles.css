@@ -1,9 +1,9 @@
 :root {
   --light-dark-color: #292929;
-  --yellow-color: #d4aa11;
   --dark-blue-color: #0c2731;
-  --accent-orange: #d17351;
-  --main-orange: #df967c;
+  --accent-orange: #ec8e6c;
+  --accent-yellow: #d4aa11;
+  --main-blue: #2d89aa;
 }
 
 * {
@@ -25,7 +25,7 @@ body {
   width: 90vw;
   height: 80vh;
   max-width: 38em;
-  padding: 3em 1.8em;
+  padding: 2em 1.8em 0em;
   background-color: #201f28;
   position: absolute;
   transform: translate(-50%, -50%);
@@ -57,7 +57,7 @@ body {
 }
 
 .search-container button {
-  background-color: var(--main-orange);
+  background-color: var(--main-blue);
   border: none;
   cursor: pointer;
   border-top-left-radius: 0;
@@ -323,7 +323,7 @@ p {
 
 #plus-icon,
 #minus-icon {
-  color: var(--main-orange);
+  color: var(--accent-yellow);
   margin: 0.3em;
 }
 
@@ -346,7 +346,7 @@ p {
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: var(--main-orange);
+  background-color: var(--main-blue);
   border-radius: 10px;
 }
 
@@ -362,6 +362,38 @@ p {
 
 #watchlist-message {
   justify-content: center;
+  text-align: center;
   font-size: 1.5em;
   font-weight: 400;
+}
+
+.pages {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1em;
+}
+
+.pages h4 {
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: white
+}
+
+#prevBtn,
+#nextBtn {
+  display: flex;
+  align-items: center;
+}
+
+#prevBtn iconify-icon ,
+#nextBtn iconify-icon{
+  scale: 1.5;
+  padding: 0px 10px;
+  color: var(--accent-yellow);
+  cursor: pointer;
+}
+
+.hide-prev-btn {
+  display: none;
 }
