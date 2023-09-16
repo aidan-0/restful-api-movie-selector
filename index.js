@@ -68,6 +68,7 @@ function displayMovieList(movies) {
 // Allow user to click on add to watchlist
 function toggleMovieInWatchlist(movieId, iconElement) {
   let watchlist = JSON.parse(localStorage.getItem("watchlist")) || [];
+  console.log('Before toggle', watchlist)
 
   // If movie is not in watchlist, add it
   if (iconElement.getAttribute("id") === "plus-icon") {
@@ -88,6 +89,7 @@ function toggleMovieInWatchlist(movieId, iconElement) {
     iconElement.setAttribute("id", "plus-icon");
     iconElement.setAttribute("icon", "clarity:plus-circle-solid");
   }
+  console.log('After toggle', watchlist);
 }
 
 function handleClickWatchlist(movieListItem) {
@@ -203,8 +205,7 @@ async function getMovieById(imdbID) {
 
 function displayWatchlist() {
   const watchlistItemsDiv = document.getElementById("watchlist-items");
-  const watchlistMessageDiv = document.getElementById("watchlist-message"); // <--- This is your message div
-
+  const watchlistMessageDiv = document.getElementById("watchlist-message");
   if (!watchlistItemsDiv) {
     return;
   }
@@ -277,35 +278,44 @@ if (watchlistResultDiv) {
 
 
 
-prevBtn.addEventListener("click", function() {
-  if(currentPage > 1) {
-    currentPage--;
+if (window.location.pathname.endsWith('index.html') || window.location.pathname === '/') {
+  prevBtn.addEventListener("click", function() {
+    if(currentPage > 1) {
+      currentPage--;
+      console.log("Current Page After Increment: ", currentPage); // Log 1
+      loadMovies(movieSearchBox.value, currentPage);
+    }
+    handlePageButtons();
+  })
+
+  nextBtn.addEventListener("click", function() {
+    currentPage++;
     console.log("Current Page After Increment: ", currentPage); // Log 1
     loadMovies(movieSearchBox.value, currentPage);
-  }
-  handlePageButtons();
-})
+    handlePageButtons();
+  })
+}
 
-nextBtn.addEventListener("click", function() {
-  currentPage++;
-  console.log("Current Page After Increment: ", currentPage); // Log 1
-  loadMovies(movieSearchBox.value, currentPage);
-  handlePageButtons();
-})
+
 
 // Toggle between pages
 function handlePageButtons() {
-  const prevBtnChildren = prevBtn.children;
-  if (currentPage === 1) {
-    for (let child of prevBtnChildren) {
-      child.classList.add("hide-prev-btn")
+  if (prevBtn) {
+    const prevBtnChildren = prevBtn.children;
+    if (currentPage === 1) {
+      for (let child of prevBtnChildren) {
+        child.classList.add("hide-prev-btn");
+      }
+    } else {
+      for (let child of prevBtnChildren) {
+        child.classList.remove("hide-prev-btn");
+      }
     }
   } else {
-    for (let child of prevBtnChildren) {
-      child.classList.remove("hide-prev-btn")
-    }
+    console.error('prevBtn element is not found.');
   }
 }
+
 
 
 window.onload = function () {
